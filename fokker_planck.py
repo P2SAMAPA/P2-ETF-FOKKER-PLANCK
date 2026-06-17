@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import gaussian_kde
-from scipy.integrate import simps
+from scipy.integrate import simpson  # corrected import
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Ridge
 
@@ -23,7 +23,7 @@ def fokker_planck_density(returns, grid_points=50):
     x_grid = np.linspace(returns.min() - 0.5, returns.max() + 0.5, grid_points)
     density = kde.evaluate(x_grid)
     # Normalise to integrate to 1
-    density = density / simps(density, x_grid)
+    density = density / simpson(density, x_grid)
     return x_grid, density
 
 def entropy_production_rate(returns, macro_df, grid_points=50):
@@ -65,7 +65,7 @@ def entropy_production_rate(returns, macro_df, grid_points=50):
     mask = (density1 > 1e-12) & (density2_on_grid1 > 1e-12)
     if np.sum(mask) < 2:
         return 0.0
-    kl = simps(density1[mask] * np.log(density1[mask] / density2_on_grid1[mask]), x_grid1[mask])
+    kl = simpson(density1[mask] * np.log(density1[mask] / density2_on_grid1[mask]), x_grid1[mask])
     # Entropy production rate = KL / (time difference)
     # Time difference = split days (approximately half the window)
     dt = split / len(returns)
